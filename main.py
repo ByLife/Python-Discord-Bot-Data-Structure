@@ -172,6 +172,48 @@ class LinkedList:
             current = current.next
         print()
 
+class Stack:
+    def __init__(self):
+        self.stack = LinkedList()
+    
+    def __repr__(self):
+        return str(self.stack)
+    
+    def __str__(self):
+        return str(self.stack)
+    
+    def __len__(self):
+        return len(self.stack)
+    
+    def __iter__(self):
+        return iter(self.stack)
+    
+    def __next__(self):
+        return next(self.stack)
+    
+    def __getitem__(self, index):
+        return self.stack[index]
+    
+    def __setitem__(self, index, value):
+        self.stack[index] = value
+    
+    def __delitem__(self, index):
+        del self.stack[index]
+    
+    def __contains__(self, item):
+        return item in self.stack
+    
+    def push(self, data):
+        self.stack.append(data)
+    
+    def pop(self):
+        if len(self.stack) == 0:
+            raise IndexError
+        else:
+            data = self.stack[-1]
+            del self.stack[-1]
+            return data
+
 #Make a new chained list
 my_list = LinkedList()
 
