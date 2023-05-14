@@ -1,5 +1,6 @@
 import random
 from discord.ext import commands
+from assets.node import Node
 
 class ConversationCommands(commands.Cog):
     def __init__(self, bot):

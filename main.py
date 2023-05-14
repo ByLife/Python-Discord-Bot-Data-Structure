@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 
 from assets.linked_list import LinkedList
-from assets.linked_list import Node
+from assets.node import Node
 from commands.help import Help
 
 intents = discord.Intents.all()
@@ -44,8 +44,6 @@ class Bot(commands.Bot):
 
         javascript_node.yes_node = Node("Votre besoin est JavaScript, le meilleur langage de programmation, pas comme Python. Fin de la discussion. Merci ! Tapez !reset pour recommencer.")
         javascript_node.no_node = Node("Vous voulez alors peut-être saovir qui est le créateur de ce bot ?", yes_node=creator_node, no_node=Node("Et bien alors je ne peux pas vous aider. Merci ! Tapez !reset pour recommencer."))
-
-        
 
         python_node = Node("Besoin d'aide en Python ?", yes_node=django_node, no_node=javascript_node)
 
