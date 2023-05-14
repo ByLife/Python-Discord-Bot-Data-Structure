@@ -1,235 +1,103 @@
-class Node:
-    def __init__(self, data):
-        self.data = data
-        self.next = None
-    
-    def __repr__(self):
-        return str(self.data)
-    
-    def __str__(self):
-        return str(self.data)
-    
-    def __eq__(self, other):
-        return self.data == other.data
-    
-    def __ne__(self, other):
-        return self.data != other.data
-    
-    def __lt__(self, other):
-        return self.data < other.data
-    
+import os
+import discord
+from discord.ext import commands
 
-class LinkedList:
-    def __init__(self):
-        self.head = None
-        self.tail = None
-        self.length = 0
-    
-    def __repr__(self):
-        return str(self.head)
-    
-    def __str__(self):
-        return str(self.head)
-    
-    def __len__(self):
-        return self.length
-    
-    def __iter__(self):
-        self.current = self.head
-        return self
-    
-    def __next__(self):
-        if self.current is None:
-            raise StopIteration
-        else:
-            data = self.current
-            self.current = self.current.next
-            return data
-    
-    def __getitem__(self, index):
-        if index < 0 or index >= self.length:
-            raise IndexError
-        else:
-            current = self.head
-            for i in range(index):
-                current = current.next
-            return current
-    
-    def __setitem__(self, index, value):
-        if index < 0 or index >= self.length:
-            raise IndexError
-        else:
-            current = self.head
-            for i in range(index):
-                current = current.next
-            current.data = value
-    
-    def __delitem__(self, index):
-        if index < 0 or index >= self.length:
-            raise IndexError
-        elif index == 0:
-            self.head = self.head.next
-            self.length -= 1
-        else:
-            current = self.head
-            for i in range(index - 1):
-                current = current.next
-            current.next = current.next.next
-            self.length -= 1
-    
-    def __contains__(self, item):
-        current = self.head
-        while current is not None:
-            if current.data == item:
-                return True
-            current = current.next
-        return False
-    
-    def __add__(self, other):
-        if not isinstance(other, LinkedList):
-            raise TypeError
-        else:
-            new_list = LinkedList()
-            current = self.head
-            while current is not None:
-                new_list.append(current.data)
-                current = current.next
-            current = other.head
-            while current is not None:
-                new_list.append(current.data)
-                current = current.next
-            return new_list
-    
-    def __iadd__(self, other):
-        if not isinstance(other, LinkedList):
-            raise TypeError
-        else:
-            current = other.head
-            while current is not None:
-                self.append(current.data)
-                current = current.next
-    
-    def append(self, data):
-        node = Node(data)
-        if self.head is None:
-            self.head = node
-            self.tail = node
-        else:
-            self.tail.next = node
-            self.tail = node
-        self.length += 1
-    
-    def insert(self, index, data):
-        node = Node(data)
-        if index < 0 or index > self.length:
-            raise IndexError
-        elif index == 0:
-            node.next = self.head
-            self.head = node
-            self.length += 1
-        else:
-            current = self.head
-            for i in range(index - 1):
-                current = current.next
-            node.next = current.next
-            current.next = node
-            self.length += 1
+from assets.linked_list import LinkedList
+from assets.linked_list import Node
+from commands.help import Help
+
+intents = discord.Intents.all()
+
+class Bot(commands.Bot):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.history = {}
+        self.access_queue = LinkedList()
+        self.tree_root = None
+        self.tree_current_node = None
+
+    async def check_access(self, ctx):
+        if not self.access_queue.head:
+            await ctx.send(f"{ctx.author.mention}, vous n'avez pas accès à l'historique actuellement.")
+            return False
+
+        current = self.access_queue.head
+        found = False
+        while current:
+            if current.data == ctx.author.id:
+                found = True
+                break
+            current = current.next_node
+
+        if not found:
+            await ctx.send(f"{ctx.author.mention}, vous n'avez pas accès à l'historique actuellement.")
+            return False
+        return True
+
+    def create_tree(self):
+        # Créer l'arbre des questions
+        bot_node = Node("Avez-vous besoin d'aide avec le bot ?")
+        django_node = Node("Avez-vous besoin d'aide avec Django ?")
+
+        creator_node = Node("Le créateur de ce bot est Léo HAIDAR. Fin de la discussion. Merci ! Tapez !reset pour recommencer.")
+        javascript_node = Node("Avez-vous besoin d'aide avec JavaScript ? ( Le meilleur langage de programmation )")
+
+        javascript_node.yes_node = Node("Votre besoin est JavaScript, le meilleur langage de programmation, pas comme Python. Fin de la discussion. Merci ! Tapez !reset pour recommencer.")
+        javascript_node.no_node = Node("Vous voulez alors peut-être saovir qui est le créateur de ce bot ?", yes_node=creator_node, no_node=Node("Et bien alors je ne peux pas vous aider. Merci ! Tapez !reset pour recommencer."))
+
         
-    def remove(self, data):
-        if self.head is None:
-            raise IndexError
-        elif self.head.data == data:
-            self.head = self.head.next
-            self.length -= 1
+
+        python_node = Node("Besoin d'aide en Python ?", yes_node=django_node, no_node=javascript_node)
+
+        bot_node.yes_node = Node("Votre besoin est le bot, voulez-vous toutes les commandes possible de faire?")
+        bot_node.no_node = python_node
+        
+
+        django_node.yes_node = Node("Votre besoin est Django, le pire framework de Python. Fin de la discussion. Merci ! Tapez !reset pour recommencer.")
+        django_node.no_node = Node("Et bien alors je ne peux pas vous aider. Merci ! Tapez !reset pour recommencer.")
+
+
+
+        self.tree_root = Node("Avez-vous besoin d'aide ?", yes_node=bot_node, no_node=python_node)
+
+        python_node.yes_node = django_node
+        python_node.no_node = javascript_node
+
+        self.tree_current_node = self.tree_root
+
+    def reset_tree(self):
+        # Réinitialiser l'arbre et revenir au nœud racine
+        self.tree_current_node = self.tree_root
+
+    def traverse_tree(self, answer):
+        # Parcourir l'arbre en fonction de la réponse de l'utilisateur
+        if answer.lower() == "oui" and self.tree_current_node.yes_node:
+            self.tree_current_node = self.tree_current_node.yes_node
+        elif answer.lower() == "non" and self.tree_current_node.no_node:
+            self.tree_current_node = self.tree_current_node.no_node
         else:
-            current = self.head
-            while current.next is not None:
-                if current.next.data == data:
-                    current.next = current.next.next
-                    self.length -= 1
-                    break
-                current = current.next
+            return "Je ne peux pas répondre à votre question."
 
-    def sort(self):
-        if self.head is None:
-            raise IndexError
-        else:
-            current = self.head
-            while current is not None:
-                next = current.next
-                while next is not None:
-                    if current.data > next.data:
-                        temp = current.data
-                        current.data = next.data
-                        next.data = temp
-                    next = next.next
-                current = current.next
-    
-    def print(self):
-        current = self.head
-        while current is not None:
-            print(current.data, end=' ')
-            current = current.next
-        print()
+        if self.tree_current_node.yes_node is None and self.tree_current_node.no_node is None:
+            # Nœud terminal atteint
+            return "Votre besoin est {}".format(self.tree_current_node.question)
+        
+        return self.tree_current_node.question
 
-class Stack:
-    def __init__(self):
-        self.stack = LinkedList()
-    
-    def __repr__(self):
-        return str(self.stack)
-    
-    def __str__(self):
-        return str(self.stack)
-    
-    def __len__(self):
-        return len(self.stack)
-    
-    def __iter__(self):
-        return iter(self.stack)
-    
-    def __next__(self):
-        return next(self.stack)
-    
-    def __getitem__(self, index):
-        return self.stack[index]
-    
-    def __setitem__(self, index, value):
-        self.stack[index] = value
-    
-    def __delitem__(self, index):
-        del self.stack[index]
-    
-    def __contains__(self, item):
-        return item in self.stack
-    
-    def push(self, data):
-        self.stack.append(data)
-    
-    def pop(self):
-        if len(self.stack) == 0:
-            raise IndexError
-        else:
-            data = self.stack[-1]
-            del self.stack[-1]
-            return data
 
-#Make a new chained list
-my_list = LinkedList()
+bot = Bot(command_prefix="!", intents=intents)
+bot.help_command = Help()
 
-#Add some nodes
-my_list.append(1)
-my_list.append(6)
-my_list.append(10)
-my_list.append(4)
-my_list.append(5)
+@bot.event
+async def on_ready():
+    print(f"{bot.user} est connecté !")
+    for filename in os.listdir("./commands"):
+        if filename.endswith(".py"):
+            await bot.load_extension(f"commands.{filename[:-3]}")
 
-#Print the length of the list
-print(len(my_list), end='\n\n')
 
-#Print the first node
-print(my_list[0])
+if __name__ == "__main__":
+    with open("token.txt", "r") as token_file:
+        TOKEN = token_file.read().strip()
 
-my_list.sort()
-
-my_list.print()
+    bot.run(TOKEN)
