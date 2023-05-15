@@ -14,6 +14,7 @@
 ## Introduction
 
 This is a simple project of a discord bot that have some commands to help you in your server.
+To know all the commands, type !help when the bot is online
 
 ## Installation
 
