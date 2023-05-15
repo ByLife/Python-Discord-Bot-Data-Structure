@@ -14,7 +14,8 @@
 ## Introduction
 
 This is a simple project of a discord bot that have some commands to help you in your server.
-To know all the commands, type !help when the bot is online
+
+To know all the commands, type ```!help``` when the bot is online
 
 ## Installation
 
@@ -22,7 +23,7 @@ To install this project and make it run you will need to have python 3.8 or high
 
 You will also need to install the discord.py library, you can do that by running the following command in your terminal:
 
-```pip install -r requirements.txt```
+```bash pip install -r requirements.txt```
 
 ## Usage
 
@@ -31,7 +32,7 @@ The token will need to be inserted in the token.txt file.
 
 To run the bot you will need to run the following command in your terminal:
 
-```python bot.py```
+```bash python bot.py```
 
 ## Contributing
 
