@@ -1,25 +1,3 @@
 [
-    "!clear_history",
-    "!conversation",
-    "!answer oui",
-    "!answer non",
-    "!answer non",
-    "!answer oui",
-    "!answer oui",
-    "!reset",
-    "!answer non",
-    "!answer oui",
-    "!answer oui",
-    "!clear 20",
-    "!rps rock",
-    "!rps paper",
-    "!help",
-    "!kick <@302156707029581825>",
-    "!guess 5",
-    "!guess",
-    "!help",
-    "!conversation",
-    "!answer non",
-    "!answer oui",
-    "!answer oui"
+    "!clear_history"
 ]

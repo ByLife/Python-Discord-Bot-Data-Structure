@@ -1,19 +1,18 @@
 import os
 import json
 from discord.ext import commands
+from assets.hash_map import HashMap
 
 class HistoryCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.history_folder = "history" 
-        self.history = {}
+        self.history = HashMap()
 
         for file_name in os.listdir(self.history_folder):
             user_id = file_name.split(".")[0]
             user_history = self.load_user_history(user_id)
-            self.history[user_id] = user_history
-            print(self.history)
-
+            self.history.insert(user_id, user_history)
 
     def load_user_history(self, user_id):
         file_name = f"{user_id}.json"
@@ -35,8 +34,7 @@ class HistoryCommands(commands.Cog):
         for file_name in os.listdir(self.history_folder):
             user_id = file_name.split(".")[0]
             user_history = self.load_user_history(user_id)
-            self.history[user_id] = user_history
-            print(self.history)
+            self.history.insert(user_id, user_history)
 
     @commands.Cog.listener()
     async def on_command_completion(self, ctx):
@@ -48,7 +46,7 @@ class HistoryCommands(commands.Cog):
         user_history = self.history.get(user_id)
         if user_history is None:
             user_history = []
-            self.history[user_id] = user_history
+            self.history.insert(user_id, user_history)
 
         user_history.append(ctx.message.content)
         self.save_user_history(user_id, user_history)
@@ -74,14 +72,10 @@ class HistoryCommands(commands.Cog):
             return
 
         user_id = str(ctx.author.id)
-        user_history = self.history.get(user_id)
-        if user_history is not None:
-            user_history.clear()
-            self.save_user_history(user_id, user_history)
+        self.history.remove(user_id)
+        self.save_user_history(user_id, [])
 
-            await ctx.send(f"{ctx.author.mention}, votre historique a été clear !")
-        else:
-            await ctx.send(f"{ctx.author.mention}, il n'y a pas d'historique pour vous.")
+        await ctx.send(f"{ctx.author.mention}, votre historique a été clear !")
 
     @commands.command(name="history")
     async def _history(self, ctx):
