@@ -27,6 +27,12 @@ You will also need to install the discord.py library, you can do that by running
 pip install -r requirements.txt
 ```
 
+If you use python3:
+
+```bash 
+pip3 install -r requirements.txt
+```
+
 ## Usage
 
 To use this bot you will need to create a bot in the discord developer portal and get the token of the bot.
@@ -36,6 +42,12 @@ To run the bot you will need to run the following command in your terminal:
 
 ```bash 
 python bot.py
+```
+
+If you use python3:
+
+```bash 
+python3 bot.py
 ```
 
 ## Contributing
