@@ -17,5 +17,9 @@
     "!kick <@302156707029581825>",
     "!guess 5",
     "!guess",
-    "!help"
+    "!help",
+    "!conversation",
+    "!answer non",
+    "!answer oui",
+    "!answer oui"
 ]
